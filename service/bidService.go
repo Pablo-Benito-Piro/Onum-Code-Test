@@ -21,8 +21,7 @@ func CreateBid(w http.ResponseWriter, r *http.Request) {
 	}
 
 	auction := dao.FindAuctionByID(bid.AuctionID)
-	log.Println(auction)
-	log.Println(bid)
+
 	if auction.ID != bid.AuctionID {
 
 		commons.SendADuplicateAuctionError(w, http.StatusInternalServerError)
@@ -44,14 +43,12 @@ func CreateBid(w http.ResponseWriter, r *http.Request) {
 	bid, error = dao.CreateBidDAO(bid)
 
 	statusProcess(bid)
-	//TODO logica status
 
 	if error != nil {
 		commons.SendError([]byte(error.Error()), w, http.StatusInternalServerError)
 		return
 	}
 
-	//TODO
 	commons.SendResponse(w, http.StatusCreated, []byte("se ha procesado la puja"))
 }
 
@@ -127,7 +124,6 @@ func GetBidsByAuctionIDandyClientID(w http.ResponseWriter, r *http.Request) {
 
 	bids = dao.FindBidsByAuctionIDAndClientID(bidSearch.ClientID, bidSearch.AuctionID)
 
-	log.Println(bids)
 	if len(bids) == 0 {
 		commons.SendAuctionEndDateError(w, http.StatusNotFound)
 	} else {

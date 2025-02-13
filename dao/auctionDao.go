@@ -1,7 +1,6 @@
 package dao
 
 import (
-	"log"
 	"onumTest/commons"
 	"onumTest/models"
 )
@@ -16,8 +15,9 @@ func FindAuctionByID(id string) models.Auction {
 	auction := models.Auction{}
 	db := commons.GetConnection()
 	defer db.Close()
+
 	db.Find(&auction, "AuctionID = ?", id)
-	log.Println(auction)
+
 	return auction
 }
 func FindAuctionByStartTimeAndEndTime(startTime int64, endTime int64) []models.Auction {
@@ -25,7 +25,7 @@ func FindAuctionByStartTimeAndEndTime(startTime int64, endTime int64) []models.A
 	db := commons.GetConnection()
 	defer db.Close()
 	db.Find(&auction, "bid_start_time <= ? and bid_end_time >= ?", startTime, endTime)
-	log.Println(auction)
+
 	return auction
 }
 func FindAuctions() []models.Auction {

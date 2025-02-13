@@ -3,7 +3,6 @@ package service
 import (
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 	"onumTest/commons"
 	"onumTest/dao"
@@ -25,7 +24,7 @@ func GetAuctionsByStartTimeAndEndTime(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	auctions = dao.FindAuctionByStartTimeAndEndTime(auctionSearch.BidStartTime, auctionSearch.BidEndTime)
-	log.Println(auctions)
+
 	if len(auctions) == 0 {
 		commons.SendAuctionEndDateError(w, http.StatusNotFound)
 	} else {
@@ -38,19 +37,16 @@ func ChecksAuctionsEndTime() {
 
 	auctions := dao.FindAuctions()
 	for _, auction := range auctions {
-		log.Println(auction.BidEndTime, "lol ", time.Now().UnixMilli())
 		if auction.BidEndTime < time.Now().UnixMilli() {
 			bids := dao.FindBids(auction.ID)
 			for _, bid := range bids {
 				if bid.Status == "best" || bid.Status == "won" {
 					bid.Status = "won"
-					dao.SaveBid(bid)
-					notifyClient(bid)
 				} else {
 					bid.Status = "lost"
-					dao.SaveBid(bid)
-					notifyClient(bid)
 				}
+				dao.SaveBid(bid)
+				notifyClient(bid)
 			}
 
 		}
@@ -66,7 +62,7 @@ func CreateAuction(w http.ResponseWriter, r *http.Request) {
 		commons.SendError([]byte(error.Error()), w, http.StatusBadRequest)
 		return
 	}
-	log.Println(auction.BidEndTime, "bbb ", time.Now().UnixMilli())
+
 	if auction.BidEndTime < time.Now().UnixMilli() {
 		commons.SendAuctionEndDateError(w, http.StatusBadRequest)
 		return

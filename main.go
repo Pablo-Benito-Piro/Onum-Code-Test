@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -30,6 +29,6 @@ func main() {
 			service.ChecksAuctionsEndTime()
 		}
 	}()
-	fmt.Println("Fin del programa")
+
 	log.Println(server.ListenAndServe())
 }
