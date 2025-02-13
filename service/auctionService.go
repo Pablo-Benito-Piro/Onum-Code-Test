@@ -28,7 +28,10 @@ func GetAuctionsByStartTimeAndEndTime(w http.ResponseWriter, r *http.Request) {
 	if len(auctions) == 0 {
 		commons.SendError([]byte("there is no auctions with that range of date"), w, http.StatusBadRequest)
 	} else {
-		result, _ := json.Marshal(auctions)
+		result, err := json.Marshal(auctions)
+		if err != nil {
+			commons.SendError([]byte(err.Error()), w, http.StatusInternalServerError)
+		}
 		commons.SendResponse(w, http.StatusOK, result)
 	}
 
@@ -80,7 +83,10 @@ func CreateAuction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resultJson, _ := json.Marshal(auction)
+	resultJson, err := json.Marshal(auction)
+	if err != nil {
+		commons.SendError([]byte(err.Error()), w, http.StatusInternalServerError)
+	}
 
 	commons.SendResponse(w, http.StatusCreated, resultJson)
 }

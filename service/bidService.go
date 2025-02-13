@@ -53,9 +53,13 @@ func CreateBid(w http.ResponseWriter, r *http.Request) {
 
 func notifyClient(bid models.Bid) {
 
-	json, _ := json.Marshal(bid)
+	jsonMarshal, err := json.Marshal(bid)
 
-	req, err := http.NewRequest(http.MethodPut, bid.Update, bytes.NewReader(json))
+	if err != nil {
+		log.Println("Error creating the notify", err)
+		return
+	}
+	req, err := http.NewRequest(http.MethodPut, bid.Update, bytes.NewReader(jsonMarshal))
 
 	if err != nil {
 		log.Println("Error creating the notify", err)
@@ -100,8 +104,14 @@ func statusProcess(lastBid models.Bid) {
 
 func ClientSimulatorCallBack(w http.ResponseWriter, r *http.Request) {
 	bid := models.Bid{}
-	json.NewDecoder(r.Body).Decode(&bid)
-	result, _ := json.Marshal(bid)
+	err := json.NewDecoder(r.Body).Decode(&bid)
+	if err != nil {
+		commons.SendError([]byte(err.Error()), w, http.StatusBadRequest)
+	}
+	result, err := json.Marshal(bid)
+	if err != nil {
+		commons.SendError([]byte(err.Error()), w, http.StatusBadRequest)
+	}
 	commons.SendResponse(w, http.StatusCreated, result)
 }
 
@@ -123,7 +133,10 @@ func GetBidsByAuctionIDandyClientID(w http.ResponseWriter, r *http.Request) {
 	if len(bids) == 0 {
 		commons.SendError([]byte("there is no bid with that client id and auction id"), w, http.StatusNotFound)
 	} else {
-		result, _ := json.Marshal(bids)
+		result, err := json.Marshal(bids)
+		if err != nil {
+			commons.SendError([]byte(err.Error()), w, http.StatusInternalServerError)
+		}
 		commons.SendResponse(w, http.StatusOK, result)
 	}
 
