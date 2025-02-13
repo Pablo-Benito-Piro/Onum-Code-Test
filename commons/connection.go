@@ -11,8 +11,8 @@ import (
 )
 
 func GetConnection() *gorm.DB {
-	errenv := godotenv.Load()
-	if errenv != nil {
+	errEnv := godotenv.Load()
+	if errEnv != nil {
 		fmt.Println("Error loading env file")
 	}
 	userDB := os.Getenv("DATABASE_USER")

@@ -14,9 +14,9 @@ import (
 
 func CreateBid(w http.ResponseWriter, r *http.Request) {
 	bid := models.Bid{}
-	error := json.NewDecoder(r.Body).Decode(&bid)
-	if error != nil {
-		commons.SendError([]byte(error.Error()), w, http.StatusBadRequest)
+	err := json.NewDecoder(r.Body).Decode(&bid)
+	if err != nil {
+		commons.SendError([]byte(err.Error()), w, http.StatusBadRequest)
 		return
 	}
 
@@ -24,27 +24,27 @@ func CreateBid(w http.ResponseWriter, r *http.Request) {
 
 	if auction.ID != bid.AuctionID {
 
-		commons.SendADuplicateAuctionError(w, http.StatusInternalServerError)
+		commons.SendADuplicateAuctionError("Bid", w, http.StatusInternalServerError)
 		return
 	}
 
 	if bid.Bid < auction.StartValue {
-		commons.SendADuplicateAuctionError(w, http.StatusInternalServerError)
+		commons.SendError([]byte("cannot create a bid lower than the Auction start value"), w, http.StatusInternalServerError)
 		return
 	}
 
 	if auction.BidEndTime < time.Now().UnixMilli() || auction.BidStartTime > time.Now().UnixMilli() {
-		commons.SendADuplicateAuctionError(w, http.StatusInternalServerError)
+		commons.SendBidEndDateError(w, http.StatusInternalServerError)
 		return
 	}
 	bid.Status = models.Processing
 
-	bid, error = dao.CreateBidDAO(bid)
+	bid, err = dao.CreateBidDAO(bid)
 
 	statusProcess(bid)
 
-	if error != nil {
-		commons.SendError([]byte(error.Error()), w, http.StatusInternalServerError)
+	if err != nil {
+		commons.SendError([]byte(err.Error()), w, http.StatusInternalServerError)
 		return
 	}
 
@@ -58,14 +58,14 @@ func notifyClient(bid models.Bid) {
 	req, err := http.NewRequest(http.MethodPut, bid.Update, bytes.NewReader(json))
 
 	if err != nil {
-		log.Println("Error creando solicitud:", err)
+		log.Println("Error creating the notify", err)
 		return
 	}
 
-	client := &http.Client{Timeout: 5 * time.Second}
+	client := &http.Client{Timeout: 2 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Println("Error enviando actualización al cliente:", err)
+		log.Println("Error sending the updated Bid:", err)
 		return
 	}
 	defer resp.Body.Close()
@@ -102,7 +102,7 @@ func ClientSimulatorCallBack(w http.ResponseWriter, r *http.Request) {
 	bid := models.Bid{}
 	json.NewDecoder(r.Body).Decode(&bid)
 	result, _ := json.Marshal(bid)
-	commons.SendResponseA(w, http.StatusCreated, result)
+	commons.SendResponse(w, http.StatusCreated, result)
 }
 
 func GetBidsByAuctionIDandyClientID(w http.ResponseWriter, r *http.Request) {
@@ -121,7 +121,7 @@ func GetBidsByAuctionIDandyClientID(w http.ResponseWriter, r *http.Request) {
 	bids = dao.FindBidsByAuctionIDAndClientID(bidSearch.ClientID, bidSearch.AuctionID)
 
 	if len(bids) == 0 {
-		commons.SendAuctionEndDateError(w, http.StatusNotFound)
+		commons.SendError([]byte("there is no bid with that client id and auction id"), w, http.StatusNotFound)
 	} else {
 		result, _ := json.Marshal(bids)
 		commons.SendResponse(w, http.StatusOK, result)

@@ -7,27 +7,26 @@ import (
 func SendResponse(writer http.ResponseWriter, status int, data []byte) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(status)
-	writer.Write(data)
-}
-func SendResponseA(writer http.ResponseWriter, status int, data []byte) {
-	writer.Header().Set("Content-Type", "application/json")
-	writer.WriteHeader(status)
-	writer.Write(data)
-
+	_, _ = writer.Write(data)
 }
 func SendError(data []byte, writer http.ResponseWriter, status int) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(status)
-	writer.Write(data)
+	_, _ = writer.Write(data)
 }
-func SendAuctionEndDateError(writer http.ResponseWriter, status int) {
 
+func SendAuctionEndDateError(writer http.ResponseWriter, status int) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(status)
-	writer.Write([]byte("error fechas"))
+	_, _ = writer.Write([]byte("Cannot create an auction with an end date before that now"))
 }
-func SendADuplicateAuctionError(writer http.ResponseWriter, status int) {
+func SendBidEndDateError(writer http.ResponseWriter, status int) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(status)
-	writer.Write([]byte("error"))
+	_, _ = writer.Write([]byte("Cannot create an Bid when an auction is close "))
+}
+func SendADuplicateAuctionError(data string, writer http.ResponseWriter, status int) {
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(status)
+	_, _ = writer.Write([]byte("There is already an " + data + "with this id"))
 }

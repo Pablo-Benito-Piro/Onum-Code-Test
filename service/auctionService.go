@@ -16,7 +16,7 @@ func GetAuctionsByStartTimeAndEndTime(w http.ResponseWriter, r *http.Request) {
 	body, _ := io.ReadAll(r.Body)
 
 	if err := json.Unmarshal(body, &auctionSearch); err != nil {
-		commons.SendError([]byte(err.Error()), w, http.StatusNotFound)
+		commons.SendError([]byte(err.Error()), w, http.StatusBadRequest)
 		return
 	}
 
@@ -26,7 +26,7 @@ func GetAuctionsByStartTimeAndEndTime(w http.ResponseWriter, r *http.Request) {
 	auctions = dao.FindAuctionByStartTimeAndEndTime(auctionSearch.BidStartTime, auctionSearch.BidEndTime)
 
 	if len(auctions) == 0 {
-		commons.SendAuctionEndDateError(w, http.StatusNotFound)
+		commons.SendError([]byte("there is no auctions with that range of date"), w, http.StatusBadRequest)
 	} else {
 		result, _ := json.Marshal(auctions)
 		commons.SendResponse(w, http.StatusOK, result)
@@ -34,7 +34,6 @@ func GetAuctionsByStartTimeAndEndTime(w http.ResponseWriter, r *http.Request) {
 
 }
 func ChecksAuctionsEndTime() {
-
 	auctions := dao.FindAuctions()
 	for _, auction := range auctions {
 		if auction.BidEndTime < time.Now().UnixMilli() {
@@ -56,10 +55,10 @@ func ChecksAuctionsEndTime() {
 func CreateAuction(w http.ResponseWriter, r *http.Request) {
 	auction := models.Auction{}
 
-	error := json.NewDecoder(r.Body).Decode(&auction)
+	errorDecode := json.NewDecoder(r.Body).Decode(&auction)
 
-	if error != nil {
-		commons.SendError([]byte(error.Error()), w, http.StatusBadRequest)
+	if errorDecode != nil {
+		commons.SendError([]byte(errorDecode.Error()), w, http.StatusBadRequest)
 		return
 	}
 
@@ -70,18 +69,18 @@ func CreateAuction(w http.ResponseWriter, r *http.Request) {
 	result := dao.FindAuctionByID(auction.ID)
 
 	if result.ID == auction.ID {
-		commons.SendADuplicateAuctionError(w, http.StatusInternalServerError)
+		commons.SendADuplicateAuctionError("Auction", w, http.StatusBadRequest)
 		return
 	}
 
-	error = dao.CreateAuctionDAO(auction)
+	errorCreate := dao.CreateAuctionDAO(auction)
 
-	if error != nil {
-		commons.SendError([]byte(error.Error()), w, http.StatusInternalServerError)
+	if errorCreate != nil {
+		commons.SendError([]byte(errorCreate.Error()), w, http.StatusInternalServerError)
 		return
 	}
 
-	json, _ := json.Marshal(auction)
+	resultJson, _ := json.Marshal(auction)
 
-	commons.SendResponse(w, http.StatusCreated, json)
+	commons.SendResponse(w, http.StatusCreated, resultJson)
 }

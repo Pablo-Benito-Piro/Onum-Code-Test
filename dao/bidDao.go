@@ -7,9 +7,9 @@ import (
 
 func CreateBidDAO(bid models.Bid) (models.Bid, error) {
 	db := commons.GetConnection()
-	error := db.Create(&bid).Error
+	err := db.Create(&bid).Error
 	db.Close()
-	return bid, error
+	return bid, err
 }
 
 func FindBidsByAuctionIDAndClientID(clientID string, auctionID string) []models.Bid {
@@ -24,7 +24,7 @@ func FindBidsByStatusBest() models.Bid {
 	var bid models.Bid
 	db := commons.GetConnection()
 	defer db.Close()
-	db.Find(&bid, "status = 'best'")
+	db.Find(&bid, "status = '"+models.Best+"'")
 	return bid
 }
 
