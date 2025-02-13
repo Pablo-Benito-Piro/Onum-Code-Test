@@ -11,3 +11,11 @@ type AuctionSearch struct {
 	BidStartTime int64 `json:"bidStartTime"`
 	BidEndTime   int64 `json:"bidEndTime" `
 }
+
+const (
+	Processing string = "processing"
+	Best       string = "best"
+	Outbided   string = "outbided"
+	Won        string = "won"
+	Lost       string = "lost"
+)

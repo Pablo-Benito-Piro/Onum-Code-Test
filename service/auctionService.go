@@ -40,10 +40,10 @@ func ChecksAuctionsEndTime() {
 		if auction.BidEndTime < time.Now().UnixMilli() {
 			bids := dao.FindBids(auction.ID)
 			for _, bid := range bids {
-				if bid.Status == "best" || bid.Status == "won" {
-					bid.Status = "won"
+				if bid.Status == models.Best || bid.Status == models.Won {
+					bid.Status = models.Won
 				} else {
-					bid.Status = "lost"
+					bid.Status = models.Lost
 				}
 				dao.SaveBid(bid)
 				notifyClient(bid)

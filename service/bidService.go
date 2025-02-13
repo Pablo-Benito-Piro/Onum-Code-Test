@@ -34,11 +34,10 @@ func CreateBid(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if auction.BidEndTime < time.Now().UnixMilli() || auction.BidStartTime > time.Now().UnixMilli() {
-		//TODO error fecha limite
 		commons.SendADuplicateAuctionError(w, http.StatusInternalServerError)
 		return
 	}
-	bid.Status = "processing"
+	bid.Status = models.Processing
 
 	bid, error = dao.CreateBidDAO(bid)
 
@@ -53,9 +52,7 @@ func CreateBid(w http.ResponseWriter, r *http.Request) {
 }
 
 func notifyClient(bid models.Bid) {
-	if bid.Status == "" {
-		bid.Status = "processing"
-	}
+
 	json, _ := json.Marshal(bid)
 
 	req, err := http.NewRequest(http.MethodPut, bid.Update, bytes.NewReader(json))
@@ -75,23 +72,22 @@ func notifyClient(bid models.Bid) {
 }
 
 func statusProcess(lastBid models.Bid) {
-	//TODO enum
 	bids := dao.FindBids(lastBid.AuctionID)
 	if len(bids) == 1 {
-		lastBid.Status = "best"
+		lastBid.Status = models.Best
 		dao.SaveBid(lastBid)
 		notifyClient(lastBid)
 
 	} else {
 		bestBid := dao.FindBidsByStatusBest()
 		if bestBid.Bid >= lastBid.Bid {
-			lastBid.Status = "outbided"
+			lastBid.Status = models.Outbided
 			dao.SaveBid(lastBid)
 			notifyClient(lastBid)
 
 		} else {
-			lastBid.Status = "best"
-			bestBid.Status = "outbided"
+			lastBid.Status = models.Best
+			bestBid.Status = models.Outbided
 			dao.SaveBid(lastBid)
 			notifyClient(lastBid)
 			dao.SaveBid(bestBid)
