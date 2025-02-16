@@ -1,17 +1,17 @@
 # Onum-Test
 
-This project is for a Code test
+This Go project is created for a Code test
 
-The project consist building an api to manage Auction and Bid
+The project consist in building an API to manage Auctions and Bids
 
-I divided the project with this structure:
+I divided the project in this structure:
 
--Commons: to handler error and create the conecction to the database
+- Commons: To handler errors and create the conecction with the database
 
--Controllers: Here is defined and expose the routes
+- Controllers: Here is defined and exposed the endpoint routes: 
 
--Dao: Where manage the create/search/update to the database
+- Dao: Where I manage the create/search/update sentences with the database
 
--Models: Defines the struct of the Auction and Bid
+- Models: Defines the struct of the Auction and Bid
 
--Service: Manage the logic behind the url petitions
+- Service: Manages the logic behind the url petitions
