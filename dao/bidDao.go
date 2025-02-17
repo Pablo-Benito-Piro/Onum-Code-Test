@@ -20,11 +20,11 @@ func FindBidsByAuctionIDAndClientID(clientID string, auctionID string) []models.
 	db.Find(&bids, "AuctionID = ? and clientId = ?", auctionID, clientID)
 	return bids
 }
-func FindBidsByStatusBest() models.Bid {
+func FindBidsByStatusBest(auctionID string) models.Bid {
 	var bid models.Bid
 	db := commons.GetConnection()
 	defer db.Close()
-	db.Find(&bid, "status = '"+models.Best+"'")
+	db.Find(&bid, "status = '"+models.Best+"' and AuctionID = ?", auctionID)
 	return bid
 }
 
