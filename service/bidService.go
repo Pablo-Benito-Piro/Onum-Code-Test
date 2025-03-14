@@ -83,7 +83,7 @@ func statusProcess(lastBid models.Bid) {
 		notifyClient(lastBid)
 
 	} else {
-		bestBid := dao.FindBidsByStatusBest()
+		bestBid := dao.FindBidsByStatusBest(lastBid.AuctionID)
 		if bestBid.Bid >= lastBid.Bid {
 			lastBid.Status = models.Outbided
 			dao.SaveBid(lastBid)
